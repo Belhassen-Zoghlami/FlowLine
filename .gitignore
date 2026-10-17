@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Django
+*.sqlite3
+.env
+staticfiles/
+media/
+
+# Tests / caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Firebase
+serviceAccount*.json
+*-firebase-adminsdk-*.json
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
