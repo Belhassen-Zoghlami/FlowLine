@@ -11,19 +11,35 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from posix import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env=environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k=v7vwd$2_%lelx*4z-_jii_h&0i9mv6m++@!5l3+_)8m&cl@f'
+# SECRET_KEY = 'django-insecure-k=v7vwd$2_%lelx*4z-_jii_h&0i9mv6m++@!5l3+_)8m&cl@f'
+
+SECRET_KEY = env("DJANGO_SECRET_KEY")
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
+
+FIREBASE_CREDENTIALS = env("FIREBASE_CREDENTIALS", default="")
+FIREBASE_API_KEY = env("FIREBASE_API_KEY", default="")
+TOKEN_ENCRYPTION_KEY = env("TOKEN_ENCRYPTION_KEY", default="")
+
+GITHUB_API_BASE = env("GITHUB_API_BASE", default="https://api.github.com")
+GITHUB_API_VERSION = env("GITHUB_API_VERSION", default="2022-11-28")
+GITHUB_API_TIMEOUT = env.int("GITHUB_API_TIMEOUT", default=20)
+GITHUB_WEBHOOK_SECRET = env("GITHUB_WEBHOOK_SECRET", default="")
+GITHUB_TOKEN = env("GITHUB_TOKEN", default="")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
 ALLOWED_HOSTS = []
 
@@ -37,6 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'accounts',
 ]
 
 MIDDLEWARE = [
