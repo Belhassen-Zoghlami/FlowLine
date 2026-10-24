@@ -26,8 +26,10 @@ def _get_app():
 
 
 def verify_id_token(id_token):
-    return firebase_auth.verify_id_token(id_token, app=_get_app())
+    return firebase_auth.verify_id_token(id_token, app=_get_app(), check_revoked=True)
 
+def revoke_tokens(uid): #revokes all tokens for a user
+    firebase_auth.revoke_refresh_tokens(uid, app=_get_app())
 
 def register_user(email, password):
     """Create the account with the Admin SDK, which bypasses the sign-up toggle."""
