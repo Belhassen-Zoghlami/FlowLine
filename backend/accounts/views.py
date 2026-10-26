@@ -88,7 +88,7 @@ def login_view(request):
         )
     developer,_=Developer.objects.get_or_create(
         firebase_uid=session["localId"],
-        defaults={"email":session.get({"email":email})}
+        defaults={"email":session.get("email",email)}
     )
     payload=_payload(developer)
     payload["id_token"] = session["idToken"]
