@@ -21,7 +21,7 @@ def decrypt(value):
     return _fernet().decrypt(value.encode()).decode()
 
 def webhook_signature(secret,body):
-    if isinstance(secret,str):
+    if isinstance(body,str):
         body=body.encode()
     digest=hmac.new(secret.encode(),body, hashlib.sha256).hexdigest()
     return f"sha256={digest}"

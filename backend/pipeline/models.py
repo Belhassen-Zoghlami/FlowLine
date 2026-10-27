@@ -4,7 +4,7 @@ from django.conf import settings
 from accounts.models import Developer
 from pipeline.security import decrypt, encrypt
 
-class FaultCategory(models.Model):
+class FaultCategory(models.TextChoices):
     IMPORT_ERROR = "import_error","Import error"
     DEPENDENCY= "dependency","Dependency problem"
     SYNTAX = "syntax","Syntax error"
