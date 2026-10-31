@@ -8,7 +8,7 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
         return "Bearer"
 
     def authenticate(self,request):
-        header= request.headers.get("Authentication","")
+        header= request.headers.get("Authorization","")
         parts= header.split()
         if len(parts) !=2 or parts[0].lower() != "bearer":
             return None

@@ -32,7 +32,7 @@ def handle_delivery(event, body, signature_header):
         raise IngestionError("Malformed JSON body.")
 
     full_name = (payload.get("repository") or {}).get("full_name", "")
-    repository = Repository.objects.filter(github_full_name=full_name).first()
+    repository = Repository.objects.filter(github_name=full_name).first()
     if repository is None:
         raise IngestionError("Repository is not registered with FlowLine.", 404)
 
@@ -41,11 +41,11 @@ def handle_delivery(event, body, signature_header):
         raise IngestionError("Invalid webhook signature.", 401)
 
     if event == "ping":
-        return 200, {"detail": "pong", "repository": repository.github_full_name}
+        return 200, {"detail": "pong", "repository": repository.github_name}
     if event != "workflow_run":
         return 202, {
             "detail": f"event '{event}' ignored",
-            "repository": repository.github_full_name,
+            "repository": repository.github_name,
         }
 
     data = payload.get("workflow_run") or {}
@@ -57,7 +57,7 @@ def handle_delivery(event, body, signature_header):
     if conclusion not in FAILURES:
         return 200, {
             "detail": f"conclusion '{conclusion}' ignored",
-            "repository": repository.github_full_name,
+            "repository": repository.github_name,
             "run_id": run_id,
         }
 
@@ -76,7 +76,7 @@ def handle_delivery(event, body, signature_header):
         run.save(update_fields=["status"])
     try:
         archive = fetch_run_logs(
-            repository.github_full_name,
+            repository.github_name,
             run_id,
             repository.access_token,
         )
@@ -87,7 +87,7 @@ def handle_delivery(event, body, signature_header):
 
     return 200, {
         "detail": "failure recorded",
-        "repository": repository.github_full_name,
+        "repository": repository.github_name,
         "run_id": run_id,
         "run_created": created,
         "status": run.status,

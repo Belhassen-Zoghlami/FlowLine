@@ -42,7 +42,7 @@ class Repository(models.Model):
 
 class Problem(models.Model):
     repository = models.ForeignKey(Repository, on_delete=models.CASCADE,related_name="problems")
-    signature = models.CharField(unique=True)
+    signature = models.TextField()
     category = models.CharField(max_length=64, choices=FaultCategory.choices,default=FaultCategory.UNKNOWN)
     num_occurrences = models.PositiveIntegerField(default=1)
     blamed_commit =models.CharField(max_length=40,blank=True)
@@ -53,7 +53,13 @@ class Problem(models.Model):
 
     class Meta:
         ordering=["-last_occ"]
-    def __Str__(self):
+        constraints = [
+            models.UniqueConstraint(
+                fields=["repository","signature"],
+                name="unique_prob_per_repo"
+            )
+        ]
+    def __str__(self):
         return self.signature 
 
 class Run(models.Model):

@@ -95,7 +95,7 @@ def login_view(request):
     return Response(payload)
 
 
-#-----------------------------------------Login View-----------------------------------------
+#-----------------------------------------Logout View-----------------------------------------
 @api_view(["POST"])
 def logout_view(request):
     try:

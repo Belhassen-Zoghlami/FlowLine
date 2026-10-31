@@ -19,8 +19,8 @@ class Developer(models.Model):
             firebase_uid=claims["uid"],
             defaults=
             {
-                "email":claims.get["email",""],
-                "display_name":claims.get["name",""],
+                "email":claims.get("email",""),
+                "display_name":claims.get("name",""),
             },
         )
         return developer
