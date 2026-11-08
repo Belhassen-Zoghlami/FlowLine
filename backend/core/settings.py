@@ -46,7 +46,7 @@ DEBUG = env.bool("DJANGO_DEBUG", default=False)
 REST_FRAMEWORK = {
 
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "accounts.athentication.FirebaseAuthentication",
+        "accounts.authentication.FirebaseAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
