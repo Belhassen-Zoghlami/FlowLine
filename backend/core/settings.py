@@ -147,3 +147,20 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+MODEL_CACHE_DIR = Path(env("MODEL_CACHE_DIR", default=str(BASE_DIR / '.models')))
+if not MODEL_CACHE_DIR.is_absolute():
+    MODEL_CACHE_DIR = str(BASE_DIR / MODEL_CACHE_DIR)
+
+EMBEDDING_MODEL = env("EMBEDDING_MODEL",default="sentence-transformers/all-MiniLM-L6-v2")
+
+EMBEDDING_MODEL_FILE = env("EMBEDDING_MODEL_FILE",default="onnx/model.onnx")
+
+CLASSIFICATION_MODEL = env("CLASSIFICATION_MODEL",default="cross-encoder/nli-deberta-v3-xsmall")
+
+CLASSIFICATION_MODEL_FILE = env("CLASSIFICATION_MODEL_FILE", default="onnx/model_quint8_avx2.onnx")
+
+PROBLEM_SIMILARITY_THRESHOLD = env.float("PROBLEM_SIMILARITY_THRESHOLD", default=0.65)
+
+CLASSIFICATION_THRESHOLD = env.float("CLASSIFICATION_THRESHOLD", default=0.55)
