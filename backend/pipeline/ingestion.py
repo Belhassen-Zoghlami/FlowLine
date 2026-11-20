@@ -2,22 +2,23 @@ import json
 import requests
 from django.conf import settings
 from pipeline import github
-from .models import Repository,Run
+from .models import Repository, Run
+from .pipeline import extract_entries, process_run
 from .security import verify_webhook_signature
 
-# defines only results flowline gaf about
-FAILURES = {"failure","timed_out"}
+FAILURES = {"failure", "timed_out"}
+
 
 class IngestionError(Exception):
-    def __init__(self,detail,status=400):
+    def __init__(self, detail, status=400):
         super().__init__(detail)
-        self.detail=detail
-        self.status=status
+        self.detail = detail
+        self.status = status
 
-# asks github for the logs of the run (NONE if run not found or deleted)
-def fetch_run_logs(full_name,run_id,token=""):
-    response=github.get(f"/repos/{full_name}/actions/runs/{run_id}/logs",token)
-    if response.status_code in (404,410,204):
+
+def fetch_run_logs(full_name, run_id, token=""):
+    response = github.get(f"/repos/{full_name}/actions/runs/{run_id}/logs", token)
+    if response.status_code in (404, 410, 204):
         return None
     response.raise_for_status()
     return response.content
@@ -28,6 +29,7 @@ def handle_delivery(event, body, signature_header):
         payload = json.loads(body)
     except (TypeError, ValueError) as exc:
         raise IngestionError("Malformed JSON body.") from exc
+
     if not isinstance(payload, dict):
         raise IngestionError("Malformed JSON body.")
 
@@ -42,6 +44,7 @@ def handle_delivery(event, body, signature_header):
 
     if event == "ping":
         return 200, {"detail": "pong", "repository": repository.github_name}
+
     if event != "workflow_run":
         return 202, {
             "detail": f"event '{event}' ignored",
@@ -71,9 +74,11 @@ def handle_delivery(event, body, signature_header):
             "status": conclusion or data.get("status") or "",
         },
     )
+
     if not created and conclusion and run.status != conclusion:
         run.status = conclusion
         run.save(update_fields=["status"])
+
     try:
         archive = fetch_run_logs(
             repository.github_name,
@@ -85,6 +90,12 @@ def handle_delivery(event, body, signature_header):
             "Could not retrieve the run logs from GitHub.", 502
         ) from exc
 
+    entries = []
+    problem = None
+    if archive:
+        entries = extract_entries(archive)
+        _, problem = process_run(run, entries)
+
     return 200, {
         "detail": "failure recorded",
         "repository": repository.github_name,
@@ -93,4 +104,10 @@ def handle_delivery(event, body, signature_header):
         "status": run.status,
         "log_fetched": bool(archive),
         "log_bytes": len(archive or b""),
-    }     
+        "log_entries": len(entries),
+        "signature": run.signature,
+        "failed_step": run.failed_step,
+        "is_parsed": run.is_parsed,
+        "problem_id": problem.pk if problem else None,
+        "num_occurrences": problem.num_occurrences if problem else None,
+    }
