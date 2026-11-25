@@ -3,6 +3,8 @@ import zipfile
 
 from .grouping import group_run
 from .parsing import parse_entries
+from .classification import classify_signature
+from .models import FaultCategory
 
 MAX_ENTRIES = 200
 MAX_ENTRY_BYTES = 2_000_000
@@ -47,4 +49,9 @@ def process_run(run, entries):
     run.save(update_fields=["signature", "failed_step", "is_parsed"])
 
     problem = group_run(run, parsed.signature)
+    if problem is not None:
+        category = classify_signature(parsed.signature)
+        if category != FaultCategory.UNKNOWN and problem.category != category:
+            problem.category = category
+            problem.save(update_fields=["category"])
     return parsed, problem
